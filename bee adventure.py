@@ -8,7 +8,18 @@ def create_pipe():
     random_pipe_pos = random.choice(pipe_height)
     bottom_pipe = pipe_surface.get_rect(midtop = (700, random_pipe_pos))
     top_pipe = pipe_surface.get_rect(midbottom = (700, random_pipe_pos - 300))
-    return bottom_pipe, top_pipe
+    
+    # Ajuste da chance para 5% de aparecer o "pote-mel" e 95% para o "mel"
+    mel_type = random.choices(['mel', 'pote-mel'], weights=[90, 10], k=1)[0]
+    if mel_type == 'mel':
+        mel = mel_surface.get_rect(center = (700, random_pipe_pos - 150))
+        mel_value = 1
+    else:
+        mel = pote_mel_surface.get_rect(center = (700, random_pipe_pos - 150))
+        mel_value = 5
+    
+    return bottom_pipe, top_pipe, (mel, mel_value)  # Retorna o mel e o valor dele
+
 
 def move_pipes(pipes):
     for pipe in pipes:
@@ -68,11 +79,32 @@ def update_score(score, high_score):
         high_score = score
     return high_score
 
+def move_mels(mels):
+    for mel, value in mels:
+        mel.centerx -= ace
+    return mels
+
+def draw_mels(mels):
+    for mel, value in mels:
+        if value == 1:
+            screen.blit(mel_surface, mel)
+        else:
+            screen.blit(pote_mel_surface, mel)
+
+def check_mel_collision(mels):
+    global score
+    for mel, value in mels:
+        if bird_rect.colliderect(mel):
+            score += value  # Incrementa o score com base no valor do mel
+            score_sound.play()
+            mels.remove((mel, value))  # Remove o mel quando o pássaro colide com ele
+    return mels
+
 pygame.mixer.pre_init(frequency = 44100, size = 16, channels = 1, buffer = 512)
 pygame.init()
 screen = pygame.display.set_mode((576, 1024))
 clock = pygame.time.Clock()
-game_font = pygame.font.Font('04B_19.ttf', 40)
+game_font = pygame.font.Font('04B_19.TTF', 40)
 
 # Game Variables
 gravity = 0.25
@@ -104,9 +136,14 @@ pygame.time.set_timer(BIRDFLAP, 200)
 pipe_surface = pygame.image.load("pipe-green.png")
 pipe_surface = pygame.transform.scale2x(pipe_surface)
 pipe_list = []
+mel_list = []
 SPAWNPIPE = pygame.USEREVENT
 pygame.time.set_timer(SPAWNPIPE, 1200)
 pipe_height = [400, 600, 800]
+
+# Carregar as superfícies do mel e pote-mel
+mel_surface = pygame.image.load('mel.png').convert_alpha()  # Mel comum que vale 1 ponto
+pote_mel_surface = pygame.image.load('pote-mel.png').convert_alpha()  # Pote-mel especial que vale 5 pontos
 
 game_over_surface = pygame.transform.scale2x(pygame.image.load('message.png').convert_alpha())
 game_over_rect = game_over_surface.get_rect(center = (288, 512))
@@ -122,7 +159,7 @@ scored_pipes = []
 # Função para aumentar a velocidade com base no score
 def update_speed(score):
     global ace
-    ace = 4 + (score // 3)  # Aumenta a velocidade de acordo com o score
+    ace = 4 + (score // 4)  # Aumenta a velocidade de acordo com o score
 
 while True:
     for event in pygame.event.get():
@@ -137,6 +174,7 @@ while True:
             if event.key == pygame.K_SPACE and not game_active:
                 game_active = True
                 pipe_list.clear()
+                mel_list.clear()
                 bird_rect.center = (100, 512)
                 bird_movement = 0
                 score = 0
@@ -144,7 +182,9 @@ while True:
                 scored_pipes.clear()
 
         if event.type == SPAWNPIPE:
-            pipe_list.extend(create_pipe())
+            bottom_pipe, top_pipe, mel_info = create_pipe()
+            pipe_list.extend([bottom_pipe, top_pipe])
+            mel_list.append(mel_info)  # Adiciona o mel junto com seu valor
 
         if event.type == BIRDFLAP:
             if bird_index < 2:
@@ -168,14 +208,11 @@ while True:
         pipe_list = move_pipes(pipe_list)
         pipe_list = remove_pipes(pipe_list)
         draw_pipes(pipe_list)
-        
-        # Lógica de aumento do score
-        for pipe in pipe_list:
-            # Verifica se o pássaro já passou por esse cano e ainda não foi pontuado
-            if pipe.centerx < bird_rect.centerx and pipe not in scored_pipes:
-                score += 0.5
-                score_sound.play()
-                scored_pipes.append(pipe)  # Marca o cano como pontuado
+
+        # Mel
+        mel_list = move_mels(mel_list)
+        mel_list = check_mel_collision(mel_list)
+        draw_mels(mel_list)
 
         # Aumenta a velocidade conforme o score
         update_speed(score)
