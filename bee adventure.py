@@ -6,20 +6,19 @@ def draw_floor():
 
 def create_pipe():
     random_pipe_pos = random.choice(pipe_height)
-    bottom_pipe = pipe_surface.get_rect(midtop = (700, random_pipe_pos))
-    top_pipe = pipe_surface.get_rect(midbottom = (700, random_pipe_pos - 300))
-    
-    # Ajuste da chance para 5% de aparecer o "pote-mel" e 95% para o "mel"
-    mel_type = random.choices(['mel', 'pote-mel'], weights=[90, 10], k=1)[0]
+    bottom_pipe = pipe_surface.get_rect(midtop=(700, random_pipe_pos))
+    top_pipe = pipe_surface.get_rect(midbottom=(700, random_pipe_pos - 300))
+
+    # Randomização do tipo de mel (5% pote-mel e 95% mel comum)
+    mel_type = random.choices(['mel', 'pote-mel'], weights=[95, 5], k=1)[0]
     if mel_type == 'mel':
-        mel = mel_surface.get_rect(center = (700, random_pipe_pos - 150))
+        mel = mel_surface.get_rect(center=(700, random_pipe_pos - 150))
         mel_value = 1
     else:
-        mel = pote_mel_surface.get_rect(center = (700, random_pipe_pos - 150))
+        mel = pote_mel_surface.get_rect(center=(700, random_pipe_pos - 150))
         mel_value = 5
-    
-    return bottom_pipe, top_pipe, (mel, mel_value)  # Retorna o mel e o valor dele
 
+    return bottom_pipe, top_pipe, (mel, mel_value)
 
 def move_pipes(pipes):
     for pipe in pipes:
@@ -40,6 +39,30 @@ def remove_pipes(pipes):
             pipes.remove(pipe)
     return pipes
 
+def move_mels(mels):
+    for mel_info in mels:
+        mel, _ = mel_info
+        mel.centerx -= ace
+    return mels
+
+def draw_mels(mels):
+    for mel_info in mels:
+        mel, mel_value = mel_info
+        if mel_value == 1:
+            screen.blit(mel_surface, mel)
+        else:
+            screen.blit(pote_mel_surface, mel)
+
+def check_mel_collision(mels):
+    global score
+    for mel_info in mels:
+        mel, mel_value = mel_info
+        if bird_rect.colliderect(mel):
+            score += mel_value
+            score_sound.play()
+            mels.remove(mel_info)
+    return mels
+
 def check_collision(pipes):
     for pipe in pipes:
         if bird_rect.colliderect(pipe):
@@ -57,21 +80,21 @@ def rotate_bird(bird):
 
 def bird_animation():
     new_bird = bird_frames[bird_index]
-    new_bird_rect = new_bird.get_rect(center = (100, bird_rect.centery))
+    new_bird_rect = new_bird.get_rect(center=(100, bird_rect.centery))
     return new_bird, new_bird_rect
 
 def score_display(game_state):
     if game_state == 'main_game':
         score_surface = game_font.render(str(int(score)), True, (255, 255, 255))
-        score_rect = score_surface.get_rect(center = (288, 100))
+        score_rect = score_surface.get_rect(center=(288, 100))
         screen.blit(score_surface, score_rect)
     if game_state == 'game_over':
         score_surface = game_font.render(f'Score: {int(score)}', True, (255, 255, 255))
-        score_rect = score_surface.get_rect(center = (288, 100))
+        score_rect = score_surface.get_rect(center=(288, 100))
         screen.blit(score_surface, score_rect)
 
         high_score_surface = game_font.render(f'High score: {int(high_score)}', True, (255, 255, 255))
-        high_score_rect = high_score_surface.get_rect(center = (288, 850))
+        high_score_rect = high_score_surface.get_rect(center=(288, 850))
         screen.blit(high_score_surface, high_score_rect)
 
 def update_score(score, high_score):
@@ -79,28 +102,12 @@ def update_score(score, high_score):
         high_score = score
     return high_score
 
-def move_mels(mels):
-    for mel, value in mels:
-        mel.centerx -= ace
-    return mels
+# Função para aumentar a velocidade com base no score, mas manter a criação de canos constante
+def update_speed(score):
+    global ace
+    ace = 4 + (score // 3)  # Aumenta a velocidade dos canos de acordo com o score
 
-def draw_mels(mels):
-    for mel, value in mels:
-        if value == 1:
-            screen.blit(mel_surface, mel)
-        else:
-            screen.blit(pote_mel_surface, mel)
-
-def check_mel_collision(mels):
-    global score
-    for mel, value in mels:
-        if bird_rect.colliderect(mel):
-            score += value  # Incrementa o score com base no valor do mel
-            score_sound.play()
-            mels.remove((mel, value))  # Remove o mel quando o pássaro colide com ele
-    return mels
-
-pygame.mixer.pre_init(frequency = 44100, size = 16, channels = 1, buffer = 512)
+pygame.mixer.pre_init(frequency=44100, size=16, channels=1, buffer=512)
 pygame.init()
 screen = pygame.display.set_mode((576, 1024))
 clock = pygame.time.Clock()
@@ -128,7 +135,7 @@ bird_upflap = pygame.transform.scale2x(pygame.image.load('yellowbird-upflap.png'
 bird_frames = [bird_downflap, bird_midflap, bird_upflap]
 bird_index = 0
 bird_surface = bird_frames[bird_index]
-bird_rect = bird_surface.get_rect(center = (100, 512))
+bird_rect = bird_surface.get_rect(center=(100, 512))
 
 BIRDFLAP = pygame.USEREVENT + 1
 pygame.time.set_timer(BIRDFLAP, 200)
@@ -136,30 +143,26 @@ pygame.time.set_timer(BIRDFLAP, 200)
 pipe_surface = pygame.image.load("pipe-green.png")
 pipe_surface = pygame.transform.scale2x(pipe_surface)
 pipe_list = []
-mel_list = []
 SPAWNPIPE = pygame.USEREVENT
 pygame.time.set_timer(SPAWNPIPE, 1200)
 pipe_height = [400, 600, 800]
 
-# Carregar as superfícies do mel e pote-mel
-mel_surface = pygame.image.load('mel.png').convert_alpha()  # Mel comum que vale 1 ponto
-pote_mel_surface = pygame.image.load('pote-mel.png').convert_alpha()  # Pote-mel especial que vale 5 pontos
+# Mel e pote-mel (moedas) - Redimensionamento
+mel_surface = pygame.image.load('mel.png').convert_alpha()
+mel_surface = pygame.transform.scale(mel_surface, (60, 70))  # Redimensiona o mel
+pote_mel_surface = pygame.image.load('pote-mel.png').convert_alpha()
+pote_mel_surface = pygame.transform.scale(pote_mel_surface, (60, 70))  # Redimensiona o pote-mel
+mel_list = []
 
 game_over_surface = pygame.transform.scale2x(pygame.image.load('message.png').convert_alpha())
-game_over_rect = game_over_surface.get_rect(center = (288, 512))
+game_over_rect = game_over_surface.get_rect(center=(288, 512))
 
 flap_sound = pygame.mixer.Sound('sfx_wing.wav')
 death_sound = pygame.mixer.Sound('sfx_hit.wav')
 score_sound = pygame.mixer.Sound('sfx_point.wav')
-score_sound_countdown = 100
 
-# Variável para controlar quais canos já pontuaram
+# Lista de pipes que já pontuaram
 scored_pipes = []
-
-# Função para aumentar a velocidade com base no score
-def update_speed(score):
-    global ace
-    ace = 4 + (score // 4)  # Aumenta a velocidade de acordo com o score
 
 while True:
     for event in pygame.event.get():
@@ -178,7 +181,7 @@ while True:
                 bird_rect.center = (100, 512)
                 bird_movement = 0
                 score = 0
-                ace = 5 
+                ace = 5
                 scored_pipes.clear()
 
         if event.type == SPAWNPIPE:
@@ -214,7 +217,7 @@ while True:
         mel_list = check_mel_collision(mel_list)
         draw_mels(mel_list)
 
-        # Aumenta a velocidade conforme o score
+        # Aumenta a velocidade conforme o score, mantendo o spawn das pipes constante
         update_speed(score)
 
         score_display('main_game')
