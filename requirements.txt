@@ -1,0 +1,3 @@
+copie e cole no terminal:
+
+pip install pygame = 2.6.1
