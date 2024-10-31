@@ -88,13 +88,16 @@ def score_display(game_state):
         score_surface = game_font.render(str(int(score)), True, (255, 255, 255))
         score_rect = score_surface.get_rect(center=(288, 100))
         screen.blit(score_surface, score_rect)
-    if game_state == 'game_over':
-        score_surface = game_font.render(f'Score: {int(score)}', True, (255, 255, 255))
-        score_rect = score_surface.get_rect(center=(288, 100))
-        screen.blit(score_surface, score_rect)
-
+    elif game_state == 'game_over':
+        # Exibir apenas o high_score na tela de game over
         high_score_surface = game_font.render(f'High score: {int(high_score)}', True, (255, 255, 255))
-        high_score_rect = high_score_surface.get_rect(center=(288, 850))
+        high_score_rect = high_score_surface.get_rect(center=(288, 600))  # Ajuste de posição conforme necessário
+        screen.blit(high_score_surface, high_score_rect)
+
+
+        # Ajuste a posição para mais alto
+        high_score_surface = game_font.render(f'High score: {int(high_score)}', True, (255, 255, 255))
+        high_score_rect = high_score_surface.get_rect(center=(288, 600))  # Ajuste de 850 para 600
         screen.blit(high_score_surface, high_score_rect)
 
 def update_score(score, high_score):
@@ -122,17 +125,25 @@ high_score = 0
 ace = 5
 ticks = 120
 
-bg_surface = pygame.image.load('background-day.png').convert()
-bg_surface = pygame.transform.scale2x(bg_surface)
+# Redimensionar o fundo de acordo com o tamanho da tela
+bg_surface = pygame.image.load('background.png').convert()
+bg_surface = pygame.transform.scale(bg_surface, (576, 1024))  # Redimensiona o fundo para o tamanho da tela
 
 floor_surface = pygame.image.load('base.png').convert()
 floor_surface = pygame.transform.scale2x(floor_surface)
 floor_x_pos = 0
 
-bird_downflap = pygame.transform.scale2x(pygame.image.load('yellowbird-downflap.png').convert_alpha())
-bird_midflap = pygame.transform.scale2x(pygame.image.load('yellowbird-midflap.png').convert_alpha())
-bird_upflap = pygame.transform.scale2x(pygame.image.load('yellowbird-upflap.png').convert_alpha())
+# Redimensionar a abelha para um tamanho menor
+bird_downflap = pygame.transform.scale2x(pygame.image.load('abelha.png').convert_alpha())
+bird_downflap = pygame.transform.scale(bird_downflap, (50, 50))  # Redimensiona a abelha para 50x50
+bird_midflap = pygame.transform.scale2x(pygame.image.load('abelha.png').convert_alpha())
+bird_midflap = pygame.transform.scale(bird_midflap, (50, 50))  # Redimensiona a abelha para 50x50
+bird_upflap = pygame.transform.scale2x(pygame.image.load('abelha.png').convert_alpha())
+bird_upflap = pygame.transform.scale(bird_upflap, (50, 50))  # Redimensiona a abelha para 50x50
+
+# Atualizando a lista de frames
 bird_frames = [bird_downflap, bird_midflap, bird_upflap]
+
 bird_index = 0
 bird_surface = bird_frames[bird_index]
 bird_rect = bird_surface.get_rect(center=(100, 512))
@@ -155,6 +166,7 @@ pote_mel_surface = pygame.transform.scale(pote_mel_surface, (60, 70))  # Redimen
 mel_list = []
 
 game_over_surface = pygame.transform.scale2x(pygame.image.load('message.png').convert_alpha())
+game_over_surface = pygame.transform.scale(game_over_surface, (576, 1024))
 game_over_rect = game_over_surface.get_rect(center=(288, 512))
 
 flap_sound = pygame.mixer.Sound('sfx_wing.wav')
