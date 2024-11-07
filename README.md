@@ -10,7 +10,7 @@ OBJETIVO: Fazer a abelha fugir do pássaro e voar entre as flores sem colidir, s
 
 JOGABILIDADE: O jogo funciona a base de cliques, onde cada toque na tela faz com que a abelha pule, enquanto o cenário se movimenta. A abelha deve evitar os obstáculos, pois caso colida com eles, o jogo termina. Paralelamente, um pássaro inimigo persegue a abelha e, se houver contato, o jogo também chega ao fim. Ao longo do percurso, a abelha pode coletar gotas de mel, que conferem uma pontuação de +5. Assim, coforme o personagem avança e ganha velocidade, encontrará potes de mel, que proporcionam +10 pontos. Quanto mais longe a abelha conseguir ir, mais rápida se tornará, aumentando o nível de desafio do jogo.
 
-**COMO JOGAR E ADICIONAR NO VISUAL CODE:**Para testar, os arquivos do jogo você precisa tirar de dentro da pasta, as imagens e os sons vem dentro da pasta arquivos do jogo, tire para não dar conflito no visual code.
+**COMO JOGAR E ADICIONAR NO VISUAL CODE**: Para testar, os arquivos do jogo você precisa tirar de dentro da pasta, as imagens e os sons vem dentro da pasta arquivos do jogo, tire para não dar conflito no visual code.
 
 DESENVOLVIMENTO: Dividimos a criação em etapas. De início fizemos a criação das telas (início, final e ganhou/perdeu), dos personagens e dos elementos em pixel. Paralelamente, fizemos a programação. Como utilizamos uma programação pronta, fomos adaptando para o nosso novo jogo.
 
