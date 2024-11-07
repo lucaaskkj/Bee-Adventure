@@ -3,6 +3,7 @@ EQUIPE: Luana Shigeoka, Lucas Scheibe e Maria Schlotefeldt;
 INSPIRAÇÃO: O jogo que criamos foi inspirado no clássico Flappy Bird;
 
 MUDANÇAS: Em nossa versão do jogo, realizamos algumas alterações significativas. A principal modificação foi a introdução de um novo personagem: enquanto o jogo original apresenta apenas um pássaro, nossa versão agora conta com uma abelha como personagem principal, além de um pássaro que atua como inimigo. Além disso, substituímos os elementos de tubo por flores, e as recompensas agora são representadas por gotas e potes de mel. O cenário foi transformado em um ambiente montanhoso. Essas mudanças também afetaram o objetivo e a jogabilidade do jogo, proporcionando uma experiência renovada e dinâmica.
+
 **ATUALIZAÇÃO**: Jogo terminado dia 31/10, algumas modificações no meio tempo em questão das caracteristicas do game. Tiramos o passaro que ficaria atrás como um inimigo e deu problema ao colocar outro estilo de obstáculos. Para testar, os arquivos do jogo você precisa tirar de dentro da pasta, as imagens e os sons vem dentro da pasta arquivos do jogo, tire para não dar conflito no visual code.
 
 OBJETIVO: Fazer a abelha fugir do pássaro e voar entre as flores sem colidir, se mantendo no ar o máximo de tempo possível para coletar o máximo de potes e gotas de mel para obter a maior pontuação possível.
